@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/fajran/buildlog/server"
+	"github.com/fajran/buildlog/pkg/server"
 )
 
 func main() {
