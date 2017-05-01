@@ -22,3 +22,13 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# IntelliJ IDEA
+.idea
+*.iml
+
+# Vim
+*.swp
+
+# Binary files
+bin/
