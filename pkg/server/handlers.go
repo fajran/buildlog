@@ -56,22 +56,22 @@ func (s *Server) handleNewBuild(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b, err := s.buildlog.Create(req.Key)
+	build, err := s.buildlog.Create(req.Key)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
 	started := iso8601(time.Now())
-	build := Build{
-		Id:       b.Id,
+	b := Build{
+		Id:       build.Id,
 		Key:      req.Key,
 		Name:     req.Name,
 		Status:   req.Status,
 		Started:  &started,
 		Finished: nil,
 	}
-	err = json.NewEncoder(w).Encode(build)
+	err = json.NewEncoder(w).Encode(b)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
