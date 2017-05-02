@@ -55,7 +55,11 @@ func (s *Server) handleNewBuild(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b := s.buildlog.Create(req.Key)
+	b, err := s.buildlog.Create(req.Key)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
 
 	started := iso8601(time.Now())
 	build := Build{
