@@ -28,10 +28,28 @@ type Build struct {
 	Finished *iso8601 `json:"finished"`
 }
 
+func validateBuildRequest(req *buildRequest) error {
+	if req.Key == "" {
+		return fmt.Errorf(`"key" is required`)
+	}
+
+	if req.Status == "" {
+		req.Status = "STARTED"
+	}
+
+	return nil
+}
+
 func (s *Server) handleNewBuild(w http.ResponseWriter, r *http.Request) {
 	var req buildRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+
+	err = validateBuildRequest(&req)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
