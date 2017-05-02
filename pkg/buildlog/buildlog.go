@@ -28,7 +28,7 @@ func NewBuildLog(db *sql.DB) *BuildLog {
 
 func (bl *BuildLog) Create(key string) (*Build, error) {
 	var id int
-	err := bl.db.QueryRow(`INSERT INTO buildlog (key) VALUES ($1) RETURNING id`, key).Scan(id)
+	err := bl.db.QueryRow(`INSERT INTO buildlog (key) VALUES ($1) RETURNING id`, key).Scan(&id)
 	if err != nil {
 		return nil, err
 	}
