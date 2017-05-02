@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -79,9 +80,46 @@ func (s *Server) handleNewBuild(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleGetBuild(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["id"]
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Not found", 404)
+		return
+	}
 
-	fmt.Fprintf(w, "id=%s", id)
+	build, err := s.buildlog.Get(id)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if build == nil {
+		http.Error(w, "Not found", 404)
+		return
+	}
+
+	var started *iso8601 = nil
+	var finished *iso8601 = nil
+	if build.Started != nil {
+		t := iso8601(*build.Started)
+		started = &t
+	}
+	if build.Finished != nil {
+		t := iso8601(*build.Finished)
+		finished = &t
+	}
+	b := Build{
+		Id:       build.Id,
+		Key:      build.Key,
+		Name:     build.Name,
+		Status:   build.Status,
+		Started:  started,
+		Finished: finished,
+	}
+
+	err = json.NewEncoder(w).Encode(b)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 func (s *Server) handlePatchBuild(w http.ResponseWriter, r *http.Request) {

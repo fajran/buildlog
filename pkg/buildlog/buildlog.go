@@ -37,3 +37,25 @@ func (bl *BuildLog) Create(key string) (*Build, error) {
 		Id: id,
 	}, nil
 }
+
+func (bl *BuildLog) Get(id int) (*Build, error) {
+	rows, err := bl.db.Query(`SELECT id, key, name, status, started, finished FROM buildlog WHERE id=$1`, id)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	if rows.Next() {
+		build := Build{}
+		var started, finished string
+		rows.Scan(&build.Id, &build.Key, &build.Name, &build.Status, &started, &finished)
+		return &build, nil
+	}
+
+	if rows.Err() != nil {
+		return nil, rows.Err()
+	}
+
+	return nil, nil
+}
