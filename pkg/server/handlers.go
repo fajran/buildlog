@@ -18,7 +18,7 @@ type buildRequest struct {
 }
 
 type Build struct {
-	Id int32 `json:"id"`
+	Id int `json:"id"`
 
 	Key  string `json:"key"`
 	Name string `json:"name"`
