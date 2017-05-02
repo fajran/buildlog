@@ -1,10 +1,13 @@
 package buildlog
 
 import (
+	"database/sql"
 	"time"
 )
 
 type BuildLog struct {
+	db *sql.DB
+
 	counter int64
 }
 
@@ -19,8 +22,9 @@ type Build struct {
 	Finished *time.Time
 }
 
-func NewBuildLog() *BuildLog {
+func NewBuildLog(db *sql.DB) *BuildLog {
 	return &BuildLog{
+		db:      db,
 		counter: 0,
 	}
 }
