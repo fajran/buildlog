@@ -27,6 +27,11 @@ func main() {
 	}
 
 	bl := buildlog.NewBuildLog(db)
+	err = bl.MigrateDb()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	s := server.NewServer(":8080", bl)
 	fmt.Printf("Address: %s\n", s.Addr)
 	s.Start()
