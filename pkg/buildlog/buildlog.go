@@ -7,12 +7,10 @@ import (
 
 type BuildLog struct {
 	db *sql.DB
-
-	counter int64
 }
 
 type Build struct {
-	Id int64
+	Id int32
 
 	Key  string
 	Name string
@@ -24,14 +22,14 @@ type Build struct {
 
 func NewBuildLog(db *sql.DB) *BuildLog {
 	return &BuildLog{
-		db:      db,
-		counter: 0,
+		db: db,
 	}
 }
 
-func (bl *BuildLog) Create() *Build {
-	bl.counter += 1
-	id := bl.counter
+func (bl *BuildLog) Create(key string) *Build {
+	var id int32
+	bl.db.QueryRow(`INSERT INTO buildlog (key) VALUES ($1) RETURNING id`, key).Scan(id)
+
 	return &Build{
 		Id: id,
 	}

@@ -18,7 +18,7 @@ type buildRequest struct {
 }
 
 type Build struct {
-	Id int64 `json:"id"`
+	Id int32 `json:"id"`
 
 	Key  string `json:"key"`
 	Name string `json:"name"`
@@ -37,7 +37,7 @@ func (s *Server) handleNewBuild(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b := s.buildlog.Create()
+	b := s.buildlog.Create(req.Key)
 
 	started := iso8601(time.Now())
 	build := Build{
