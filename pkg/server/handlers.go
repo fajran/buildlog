@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"io"
@@ -16,6 +17,17 @@ type buildRequest struct {
 	Status string `json:"status"`
 }
 
+type Build struct {
+	Id int64 `json:"id"`
+
+	Key  string `json:"key"`
+	Name string `json:"name"`
+
+	Status   string   `json:"status"`
+	Started  *iso8601 `json:"started"`
+	Finished *iso8601 `json:"finished"`
+}
+
 func (s *Server) handleNewBuild(w http.ResponseWriter, r *http.Request) {
 	var req buildRequest
 
@@ -25,8 +37,22 @@ func (s *Server) handleNewBuild(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := 12345
-	fmt.Fprintf(w, "New build: key=%s, name=%s, status=%s => id=%d", req.Key, req.Name, req.Status, id)
+	b := s.buildlog.Create()
+
+	started := iso8601(time.Now())
+	build := Build{
+		Id:       b.Id,
+		Key:      req.Key,
+		Name:     req.Name,
+		Status:   req.Status,
+		Started:  &started,
+		Finished: nil,
+	}
+	err = json.NewEncoder(w).Encode(build)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 func (s *Server) handleGetBuild(w http.ResponseWriter, r *http.Request) {

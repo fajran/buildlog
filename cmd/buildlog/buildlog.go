@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 
+	"github.com/fajran/buildlog/pkg/buildlog"
 	"github.com/fajran/buildlog/pkg/server"
 )
 
 func main() {
-	s := server.NewServer(":8080")
+	bl := buildlog.NewBuildLog()
+	s := server.NewServer(":8080", bl)
 	fmt.Printf("Address: %s\n", s.Addr)
 	s.Start()
 }

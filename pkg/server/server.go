@@ -4,16 +4,21 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/fajran/buildlog/pkg/buildlog"
+
 	"github.com/gorilla/mux"
 )
 
 type Server struct {
 	Addr string
+
+	buildlog *buildlog.BuildLog
 }
 
-func NewServer(address string) *Server {
+func NewServer(address string, buildlog *buildlog.BuildLog) *Server {
 	return &Server{
-		Addr: address,
+		Addr:     address,
+		buildlog: buildlog,
 	}
 }
 
