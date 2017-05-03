@@ -3,6 +3,7 @@ package buildlog
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/mattes/migrate"
 	"github.com/mattes/migrate/database/postgres"
@@ -27,7 +28,13 @@ func (bl *BuildLog) MigrateDb() error {
 		return err
 	}
 
-	m, err := migrate.NewWithDatabaseInstance("file://migrations", "postgres", driver)
+	source := os.Getenv("DB_MIGRATIONS_SOURCE_URI")
+	if source == "" {
+		source = "file://migrations"
+	}
+	log.Printf("Using DB migrations file from %s\n", source)
+
+	m, err := migrate.NewWithDatabaseInstance(source, "postgres", driver)
 	if err != nil {
 		return err
 	}
