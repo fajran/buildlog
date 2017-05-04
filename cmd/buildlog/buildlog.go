@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 
@@ -21,6 +20,12 @@ func openDb() (*sql.DB, error) {
 }
 
 func main() {
+	addr := os.Getenv("SERVER_ADDR")
+	if addr == "" {
+		addr = ":8080"
+	}
+	log.Printf("Running server on %s", addr)
+
 	db, err := openDb()
 	if err != nil {
 		log.Fatal(err)
@@ -32,7 +37,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s := server.NewServer(":8080", bl)
-	fmt.Printf("Address: %s\n", s.Addr)
+	s := server.NewServer(addr, bl)
 	s.Start()
 }
