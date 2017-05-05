@@ -28,7 +28,7 @@ func (s *Server) Start() {
 		HandlerFunc(s.handleNewBuild)
 	r.NewRoute().Methods("GET").Path("/v1/builds/{id}").
 		HandlerFunc(s.handleGetBuild)
-	r.NewRoute().Methods("POST").Path("/v1/builds/{id}").
+	r.NewRoute().Methods("POST").Path("/v1/builds/{id}/logs").
 		HandlerFunc(s.handlePostLog)
 
 	ss := &http.Server{
