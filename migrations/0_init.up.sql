@@ -1,4 +1,4 @@
-CREATE TABLE buildlog (
+CREATE TABLE builds (
   id SERIAL,
   created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
@@ -9,5 +9,5 @@ CREATE TABLE buildlog (
   finished TIMESTAMP WITH TIME ZONE
 );
 
-CREATE INDEX buildlog_idx_key ON buildlog (key);
+CREATE INDEX builds_idx_key ON builds (key);
 
