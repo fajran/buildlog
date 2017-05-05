@@ -18,6 +18,14 @@ type Build struct {
 	Status   string
 	Started  *time.Time
 	Finished *time.Time
+
+	buildlog *BuildLog
+}
+
+type Log struct {
+	Id int
+
+	build *Build
 }
 
 func NewBuildLog(db *sql.DB) *BuildLog {
@@ -34,7 +42,8 @@ func (bl *BuildLog) Create(key string) (*Build, error) {
 	}
 
 	return &Build{
-		Id: id,
+		Id:       id,
+		buildlog: bl,
 	}, nil
 }
 
@@ -47,7 +56,9 @@ func (bl *BuildLog) Get(id int) (*Build, error) {
 	defer rows.Close()
 
 	if rows.Next() {
-		build := Build{}
+		build := Build{
+			buildlog: bl,
+		}
 		var started, finished string
 		rows.Scan(&build.Id, &build.Key, &build.Name, &build.Status, &started, &finished)
 		return &build, nil
@@ -58,4 +69,17 @@ func (bl *BuildLog) Get(id int) (*Build, error) {
 	}
 
 	return nil, nil
+}
+
+func (b *Build) Log(logtype string) (*Log, error) {
+	var id int
+	err := b.buildlog.db.QueryRow(`INSERT INTO logs (build_id, type) VALUES ($1, $2) RETURNING id`, b.Id, logtype).Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Log{
+		Id:    id,
+		build: b,
+	}, nil
 }

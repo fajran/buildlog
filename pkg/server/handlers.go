@@ -152,3 +152,47 @@ func (s *Server) handlePutBuild(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Part: name=%s, filename=%s, type=%s\n", p.FormName(), p.FileName(), p.Header.Get("Content-Type"))
 	}
 }
+
+func (s *Server) handlePostLog(w http.ResponseWriter, r *http.Request) {
+	qs := r.URL.Query()
+	t := qs.Get("type")
+	if t == "" {
+		http.Error(w, `"type" is required`, 400)
+		return
+	}
+
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Not found", 404)
+		return
+	}
+
+	build, err := s.buildlog.Get(id)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if build == nil {
+		http.Error(w, "Not found", 404)
+		return
+	}
+
+	blog, err := build.Log(t)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	var resp = struct {
+		Id int `json:"id"`
+	}{
+		Id: blog.Id,
+	}
+
+	err = json.NewEncoder(w).Encode(resp)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+}
