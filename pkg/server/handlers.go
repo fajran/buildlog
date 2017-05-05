@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"io"
 )
 
 type buildRequest struct {
@@ -119,37 +118,6 @@ func (s *Server) handleGetBuild(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
-	}
-}
-
-func (s *Server) handlePatchBuild(w http.ResponseWriter, r *http.Request) {
-	var req buildRequest
-
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-}
-
-func (s *Server) handlePutBuild(w http.ResponseWriter, r *http.Request) {
-	mr, err := r.MultipartReader()
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-
-	for {
-		p, err := mr.NextPart()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			http.Error(w, err.Error(), 400)
-			return
-		}
-
-		fmt.Printf("Part: name=%s, filename=%s, type=%s\n", p.FormName(), p.FileName(), p.Header.Get("Content-Type"))
 	}
 }
 

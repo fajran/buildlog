@@ -27,13 +27,8 @@ func (s *Server) Start() {
 	r.NewRoute().Methods("POST").Path("/v1/builds").
 		Headers("Content-Type", "application/json").
 		HandlerFunc(s.handleNewBuild)
-	r.NewRoute().Methods("PATCH").Path("/v1/builds/{id}").
-		Headers("Content-Type", "application/json").
-		HandlerFunc(s.handlePatchBuild)
 	r.NewRoute().Methods("GET").Path("/v1/builds/{id}").
 		HandlerFunc(s.handleGetBuild)
-	r.NewRoute().Methods("PUT").Path("/v1/builds/{id}").
-		HandlerFunc(s.handlePutBuild)
 	r.NewRoute().Methods("POST").Path("/v1/builds/{id}").
 		HandlerFunc(s.handlePostLog)
 
