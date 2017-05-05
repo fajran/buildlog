@@ -27,17 +27,14 @@ func NewBuildLog(db *sql.DB) *BuildLog {
 	}
 }
 
-func (bl *BuildLog) Create(key string) (*Build, error) {
+func (bl *BuildLog) Create(key string) (int, error) {
 	var id int
 	err := bl.db.QueryRow(`INSERT INTO builds (key) VALUES ($1) RETURNING id`, key).Scan(&id)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	return &Build{
-		Id:       id,
-		buildlog: bl,
-	}, nil
+	return id, nil
 }
 
 func (bl *BuildLog) Get(id int) (*Build, error) {
@@ -63,15 +60,12 @@ func (bl *BuildLog) Get(id int) (*Build, error) {
 	return nil, nil
 }
 
-func (b *Build) Log(logtype string) (*Log, error) {
+func (b *Build) Log(logtype string) (int, error) {
 	var id int
 	err := b.buildlog.db.QueryRow(`INSERT INTO logs (build_id, type) VALUES ($1, $2) RETURNING id`, b.Id, logtype).Scan(&id)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	return &Log{
-		Id:    id,
-		build: b,
-	}, nil
+	return id, nil
 }

@@ -13,6 +13,10 @@ type Build struct {
 	Key string `json:"key"`
 }
 
+type Log struct {
+	Id int `json:"id"`
+}
+
 func (s *Server) handleNewBuild(w http.ResponseWriter, r *http.Request) {
 	qs := r.URL.Query()
 	key := qs.Get("key")
@@ -21,14 +25,14 @@ func (s *Server) handleNewBuild(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	build, err := s.buildlog.Create(key)
+	id, err := s.buildlog.Create(key)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
 	b := Build{
-		Id:  build.Id,
+		Id:  id,
 		Key: key,
 	}
 	err = json.NewEncoder(w).Encode(b)
@@ -93,19 +97,17 @@ func (s *Server) handlePostLog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blog, err := build.Log(t)
+	lid, err := build.Log(t)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
-	var resp = struct {
-		Id int `json:"id"`
-	}{
-		Id: blog.Id,
+	l := Log{
+		Id: lid,
 	}
 
-	err = json.NewEncoder(w).Encode(resp)
+	err = json.NewEncoder(w).Encode(l)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
