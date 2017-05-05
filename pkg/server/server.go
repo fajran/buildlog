@@ -25,7 +25,6 @@ func NewServer(address string, buildlog *buildlog.BuildLog) *Server {
 func (s *Server) Start() {
 	r := mux.NewRouter()
 	r.NewRoute().Methods("POST").Path("/v1/builds").
-		Headers("Content-Type", "application/json").
 		HandlerFunc(s.handleNewBuild)
 	r.NewRoute().Methods("GET").Path("/v1/builds/{id}").
 		HandlerFunc(s.handleGetBuild)

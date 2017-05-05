@@ -2,73 +2,34 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gorilla/mux"
 )
 
-type buildRequest struct {
-	Key  string `json:"key"`
-	Name string `json:"name"`
-
-	Status string `json:"status"`
-}
-
 type Build struct {
-	Id int `json:"id"`
-
-	Key  string `json:"key"`
-	Name string `json:"name"`
-
-	Status   string   `json:"status"`
-	Started  *iso8601 `json:"started"`
-	Finished *iso8601 `json:"finished"`
-}
-
-func validateBuildRequest(req *buildRequest) error {
-	if req.Key == "" {
-		return fmt.Errorf(`"key" is required`)
-	}
-
-	if req.Status == "" {
-		req.Status = "STARTED"
-	}
-
-	return nil
+	Id  int    `json:"id"`
+	Key string `json:"key"`
 }
 
 func (s *Server) handleNewBuild(w http.ResponseWriter, r *http.Request) {
-	var req buildRequest
-
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		http.Error(w, err.Error(), 400)
+	qs := r.URL.Query()
+	key := qs.Get("key")
+	if key == "" {
+		http.Error(w, `"key" is required`, 400)
 		return
 	}
 
-	err = validateBuildRequest(&req)
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-
-	build, err := s.buildlog.Create(req.Key)
+	build, err := s.buildlog.Create(key)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
-	started := iso8601(time.Now())
 	b := Build{
-		Id:       build.Id,
-		Key:      req.Key,
-		Name:     req.Name,
-		Status:   req.Status,
-		Started:  &started,
-		Finished: nil,
+		Id:  build.Id,
+		Key: key,
 	}
 	err = json.NewEncoder(w).Encode(b)
 	if err != nil {
@@ -95,23 +56,9 @@ func (s *Server) handleGetBuild(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var started *iso8601 = nil
-	var finished *iso8601 = nil
-	if build.Started != nil {
-		t := iso8601(*build.Started)
-		started = &t
-	}
-	if build.Finished != nil {
-		t := iso8601(*build.Finished)
-		finished = &t
-	}
 	b := Build{
-		Id:       build.Id,
-		Key:      build.Key,
-		Name:     build.Name,
-		Status:   build.Status,
-		Started:  started,
-		Finished: finished,
+		Id:  build.Id,
+		Key: build.Key,
 	}
 
 	err = json.NewEncoder(w).Encode(b)

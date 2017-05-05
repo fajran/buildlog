@@ -2,7 +2,6 @@ package buildlog
 
 import (
 	"database/sql"
-	"time"
 )
 
 type BuildLog struct {
@@ -10,14 +9,8 @@ type BuildLog struct {
 }
 
 type Build struct {
-	Id int
-
-	Key  string
-	Name string
-
-	Status   string
-	Started  *time.Time
-	Finished *time.Time
+	Id  int
+	Key string
 
 	buildlog *BuildLog
 }
@@ -48,7 +41,7 @@ func (bl *BuildLog) Create(key string) (*Build, error) {
 }
 
 func (bl *BuildLog) Get(id int) (*Build, error) {
-	rows, err := bl.db.Query(`SELECT id, key, name, status, started, finished FROM builds WHERE id=$1`, id)
+	rows, err := bl.db.Query(`SELECT id, key FROM builds WHERE id=$1`, id)
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +52,7 @@ func (bl *BuildLog) Get(id int) (*Build, error) {
 		build := Build{
 			buildlog: bl,
 		}
-		var started, finished string
-		rows.Scan(&build.Id, &build.Key, &build.Name, &build.Status, &started, &finished)
+		rows.Scan(&build.Id, &build.Key)
 		return &build, nil
 	}
 
