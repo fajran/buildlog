@@ -24,19 +24,21 @@ func main() {
 	if addr == "" {
 		addr = ":8080"
 	}
-	log.Printf("Running server on %s", addr)
 
 	db, err := openDb()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	bl := buildlog.NewBuildLog(db)
+	bl := buildlog.NewBuildLog(db, nil)
+
+	log.Printf("Migrating database")
 	err = bl.MigrateDb()
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	log.Printf("Running server on %s", addr)
 	s := server.NewServer(addr, bl)
 	s.Start()
 }
