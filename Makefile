@@ -11,3 +11,10 @@ docker : bin/buildlog.static
 
 test :
 	go test ./pkg/... ./cmd/...
+
+get-deps :
+	go get github.com/gorilla/mux
+	go get github.com/lib/pq
+	go get github.com/mattes/migrate
+	go get gopkg.in/yaml.v2
+

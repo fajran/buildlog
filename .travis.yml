@@ -8,13 +8,8 @@ services:
 go:
 - 1.8.1
 
-install:
-- go get github.com/gorilla/mux
-- go get github.com/lib/pq
-- go get github.com/mattes/migrate
-- go get gopkg.in/yaml.v2
-
 script:
+- make get-deps
 - make test
 - make bin/buildlog bin/buildlog.static
 - make docker
