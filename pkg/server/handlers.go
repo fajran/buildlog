@@ -14,7 +14,12 @@ type Build struct {
 }
 
 type Log struct {
-	Id int `json:"id"`
+	Id      int `json:"id"`
+	BuildId int `json:"buildId"`
+
+	Type        string `json:"type"`
+	ContentType string `json:"contentType"`
+	Size        int64  `json:"size"`
 }
 
 func (s *Server) handleNewBuild(w http.ResponseWriter, r *http.Request) {
@@ -110,6 +115,53 @@ func (s *Server) handlePostLog(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = json.NewEncoder(w).Encode(l)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+}
+
+func (s *Server) handleGetLogMetadata(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Not found", 404)
+		return
+	}
+	buildId, err := strconv.Atoi(vars["buildId"])
+	if err != nil {
+		http.Error(w, "Not found", 404)
+		return
+	}
+
+	build, err := s.buildlog.Get(buildId)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if build == nil {
+		http.Error(w, "Not found", 404)
+		return
+	}
+
+	data, err := build.GetLog(id)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if data == nil {
+		http.Error(w, "Not found", 404)
+		return
+	}
+
+	jsonData := Log{
+		Id:          data.Id,
+		BuildId:     data.Build.Id,
+		Type:        data.Type,
+		ContentType: data.ContentType,
+		Size:        data.Size,
+	}
+	err = json.NewEncoder(w).Encode(jsonData)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return

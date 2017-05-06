@@ -22,7 +22,13 @@ type Build struct {
 type Log struct {
 	Id int
 
-	build *Build
+	Type        string
+	ContentType string
+
+	ContentId string
+	Size      int64
+
+	Build *Build
 }
 
 func NewBuildLog(db *sql.DB, storage logstorage.Storage) *BuildLog {
@@ -89,4 +95,34 @@ func (b *Build) Log(logType, contentType string, content io.Reader) (int, error)
 	}
 
 	return id, nil
+}
+
+func (b *Build) GetLog(id int) (*Log, error) {
+	rows, err := b.buildlog.db.Query(
+		`SELECT id, type, content_type, identifier, size FROM logs
+		 WHERE build_id=$1 AND id=$2`,
+		b.Id, id)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	if rows.Next() {
+		data := Log{
+			Build: b,
+		}
+		err = rows.Scan(&data.Id, &data.Type, &data.ContentType, &data.ContentId, &data.Size)
+		if err != nil {
+			return nil, err
+		}
+		return &data, nil
+	}
+
+	if rows.Err() != nil {
+		return nil, rows.Err()
+	}
+
+	return nil, nil
+
 }
