@@ -54,7 +54,10 @@ func (bl *BuildLog) Get(id int) (*Build, error) {
 		build := Build{
 			buildlog: bl,
 		}
-		rows.Scan(&build.Id, &build.Key)
+		err = rows.Scan(&build.Id, &build.Key)
+		if err != nil {
+			return nil, err
+		}
 		return &build, nil
 	}
 
