@@ -15,6 +15,7 @@ install:
 - go get gopkg.in/yaml.v2
 
 script:
+- make test
 - make bin/buildlog bin/buildlog.static
 - make docker
 
