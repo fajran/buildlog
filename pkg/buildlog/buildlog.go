@@ -60,9 +60,12 @@ func (bl *BuildLog) Get(id int) (*Build, error) {
 	return nil, nil
 }
 
-func (b *Build) Log(logtype string) (int, error) {
+func (b *Build) Log(logType, contentType string) (int, error) {
 	var id int
-	err := b.buildlog.db.QueryRow(`INSERT INTO logs (build_id, type) VALUES ($1, $2) RETURNING id`, b.Id, logtype).Scan(&id)
+	err := b.buildlog.db.QueryRow(
+		`INSERT INTO logs (build_id, type, content_type) VALUES ($1, $2, $3) RETURNING id`,
+		b.Id, logType, contentType).
+		Scan(&id)
 	if err != nil {
 		return 0, err
 	}

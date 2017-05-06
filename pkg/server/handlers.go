@@ -97,7 +97,9 @@ func (s *Server) handlePostLog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lid, err := build.Log(t)
+	ct := r.Header["Content-Type"][0]
+
+	lid, err := build.Log(t, ct)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
