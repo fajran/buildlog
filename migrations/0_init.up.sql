@@ -14,7 +14,9 @@ CREATE TABLE logs (
 	created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
 	type VARCHAR(50),
-	content_type VARCHAR(100)
+	content_type VARCHAR(100),
+	identifier VARCHAR(200),
+	size BIGINT
 );
 
 CREATE INDEX logs_idx_type ON logs (type);

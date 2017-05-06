@@ -9,6 +9,7 @@ import (
 
 	"github.com/fajran/buildlog/pkg/buildlog"
 	"github.com/fajran/buildlog/pkg/server"
+	"github.com/fajran/buildlog/pkg/storage/disk"
 )
 
 func openDb() (*sql.DB, error) {
@@ -25,12 +26,23 @@ func main() {
 		addr = ":8080"
 	}
 
+	dataPath := os.Getenv("DATA_PATH")
+	if dataPath == "" {
+		log.Fatal("Please define DATA_PATH environment variable")
+	}
+
 	db, err := openDb()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	bl := buildlog.NewBuildLog(db, nil)
+	storage, err := disk.NewDiskStorage(dataPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Using data path at %s", dataPath)
+
+	bl := buildlog.NewBuildLog(db, storage)
 
 	log.Printf("Migrating database")
 	err = bl.MigrateDb()

@@ -2,10 +2,14 @@ package buildlog
 
 import (
 	"database/sql"
+	"io"
+
+	logstorage "github.com/fajran/buildlog/pkg/storage"
 )
 
 type BuildLog struct {
-	db *sql.DB
+	db      *sql.DB
+	storage logstorage.Storage
 }
 
 type Build struct {
@@ -21,9 +25,10 @@ type Log struct {
 	build *Build
 }
 
-func NewBuildLog(db *sql.DB) *BuildLog {
+func NewBuildLog(db *sql.DB, storage logstorage.Storage) *BuildLog {
 	return &BuildLog{
-		db: db,
+		db:      db,
+		storage: storage,
 	}
 }
 
@@ -60,7 +65,7 @@ func (bl *BuildLog) Get(id int) (*Build, error) {
 	return nil, nil
 }
 
-func (b *Build) Log(logType, contentType string) (int, error) {
+func (b *Build) Log(logType, contentType string, content io.Reader) (int, error) {
 	var id int
 	err := b.buildlog.db.QueryRow(
 		`INSERT INTO logs (build_id, type, content_type) VALUES ($1, $2, $3) RETURNING id`,
@@ -68,6 +73,16 @@ func (b *Build) Log(logType, contentType string) (int, error) {
 		Scan(&id)
 	if err != nil {
 		return 0, err
+	}
+
+	info, err := b.buildlog.storage.Store(id, content)
+	if err != nil {
+		return id, err
+	}
+
+	_, err = b.buildlog.db.Exec(`UPDATE logs SET identifier=$1, size=$2 WHERE id=$3`, info.Id, info.Size, id)
+	if err != nil {
+		return id, err
 	}
 
 	return id, nil
