@@ -21,4 +21,5 @@ CREATE TABLE logs (
 );
 
 CREATE INDEX logs_idx_type ON logs (type);
+CREATE INDEX logs_idx_build_id ON logs (build_id);
 
