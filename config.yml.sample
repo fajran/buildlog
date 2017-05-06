@@ -1,0 +1,12 @@
+server:
+  address: ":8080"
+
+data-path: data
+
+database:
+  name: buildlog
+  host: localhost
+  username: postgres
+  password: postgres
+  options: 'sslmode=disable'
+

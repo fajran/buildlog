@@ -12,6 +12,7 @@ install:
 - go get github.com/gorilla/mux
 - go get github.com/lib/pq
 - go get github.com/mattes/migrate
+- go get gopkg.in/yaml.v2
 
 script:
 - make bin/buildlog bin/buildlog.static
