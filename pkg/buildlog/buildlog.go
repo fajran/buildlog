@@ -3,6 +3,7 @@ package buildlog
 import (
 	"database/sql"
 	"io"
+	"strings"
 
 	logstorage "github.com/fajran/buildlog/pkg/storage"
 )
@@ -22,8 +23,10 @@ type Build struct {
 type Log struct {
 	Id int
 
-	Type        string
-	ContentType string
+	Type string
+
+	ContentType          string
+	ContentTypeParameter string
 
 	ContentId string
 	Size      int64
@@ -74,11 +77,25 @@ func (bl *BuildLog) Get(id int) (*Build, error) {
 	return nil, nil
 }
 
+func splitContentTypeParameter(contentType string) (string, string) {
+	p := strings.SplitN(contentType, ";", 2)
+
+	ct := strings.TrimSpace(p[0])
+	ctp := ""
+	if len(p) > 1 {
+		ctp = strings.TrimSpace(p[1])
+	}
+
+	return ct, ctp
+}
+
 func (b *Build) Log(logType, contentType string, content io.Reader) (int, error) {
+	ct, ctp := splitContentTypeParameter(contentType)
+
 	var id int
 	err := b.buildlog.db.QueryRow(
-		`INSERT INTO logs (build_id, type, content_type) VALUES ($1, $2, $3) RETURNING id`,
-		b.Id, logType, contentType).
+		`INSERT INTO logs (build_id, type, content_type, content_type_parameter) VALUES ($1, $2, $3, $4) RETURNING id`,
+		b.Id, logType, ct, ctp).
 		Scan(&id)
 	if err != nil {
 		return 0, err
@@ -99,7 +116,7 @@ func (b *Build) Log(logType, contentType string, content io.Reader) (int, error)
 
 func (b *Build) GetLog(id int) (*Log, error) {
 	rows, err := b.buildlog.db.Query(
-		`SELECT id, type, content_type, identifier, size FROM logs
+		`SELECT id, type, content_type, content_type_parameter, identifier, size FROM logs
 		 WHERE build_id=$1 AND id=$2`,
 		b.Id, id)
 	if err != nil {
@@ -112,7 +129,9 @@ func (b *Build) GetLog(id int) (*Log, error) {
 		data := Log{
 			Build: b,
 		}
-		err = rows.Scan(&data.Id, &data.Type, &data.ContentType, &data.ContentId, &data.Size)
+		err = rows.Scan(
+			&data.Id, &data.Type, &data.ContentType, &data.ContentTypeParameter,
+			&data.ContentId, &data.Size)
 		if err != nil {
 			return nil, err
 		}

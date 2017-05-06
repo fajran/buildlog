@@ -14,7 +14,8 @@ CREATE TABLE logs (
 	created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
 	type VARCHAR(50),
-	content_type VARCHAR(200),
+	content_type VARCHAR(100),
+	content_type_parameter VARCHAR(200),
 	identifier VARCHAR(200),
 	size BIGINT
 );
