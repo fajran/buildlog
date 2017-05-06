@@ -9,3 +9,5 @@ bin/buildlog.static :
 docker : bin/buildlog.static
 	docker build -t fajran/buildlog .
 
+test :
+	go test ./pkg/... ./cmd/...
