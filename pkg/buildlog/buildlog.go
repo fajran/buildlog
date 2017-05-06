@@ -143,5 +143,8 @@ func (b *Build) GetLog(id int) (*Log, error) {
 	}
 
 	return nil, nil
+}
 
+func (l *Log) Read() (io.Reader, error) {
+	return l.Build.buildlog.storage.Read(l.Id)
 }

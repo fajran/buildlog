@@ -7,6 +7,7 @@ import (
 type Storage interface {
 	Info() Info
 	Store(id int, content io.Reader) (StoreInfo, error)
+	Read(id int) (io.Reader, error)
 }
 
 type Info struct {

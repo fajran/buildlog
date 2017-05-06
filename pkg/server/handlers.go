@@ -1,7 +1,10 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -166,4 +169,59 @@ func (s *Server) handleGetLogMetadata(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
+}
+
+func (s *Server) handleGetLog(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Not found", 404)
+		return
+	}
+	buildId, err := strconv.Atoi(vars["buildId"])
+	if err != nil {
+		http.Error(w, "Not found", 404)
+		return
+	}
+
+	build, err := s.buildlog.Get(buildId)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if build == nil {
+		http.Error(w, "Not found", 404)
+		return
+	}
+
+	data, err := build.GetLog(id)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if data == nil {
+		http.Error(w, "Not found", 404)
+		return
+	}
+
+	dr, err := data.Read()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	ct := createContentType(data.ContentType, data.ContentTypeParameter)
+	w.Header().Set("Content-Type", ct)
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", data.Size))
+	io.CopyN(w, dr, data.Size)
+}
+
+func createContentType(contentType, parameter string) string {
+	var b bytes.Buffer
+	b.WriteString(contentType)
+	if parameter != "" {
+		b.WriteString("; ")
+		b.WriteString(parameter)
+	}
+	return b.String()
 }

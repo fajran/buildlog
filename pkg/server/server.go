@@ -32,6 +32,8 @@ func (s *Server) Start() {
 		HandlerFunc(s.handlePostLog)
 	r.NewRoute().Methods("GET").Path("/v1/builds/{buildId}/logs/{id}/metadata").
 		HandlerFunc(s.handleGetLogMetadata)
+	r.NewRoute().Methods("GET").Path("/v1/builds/{buildId}/logs/{id}").
+		HandlerFunc(s.handleGetLog)
 
 	ss := &http.Server{
 		Addr:    s.Addr,

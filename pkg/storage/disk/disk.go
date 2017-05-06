@@ -64,3 +64,10 @@ func (s *DiskStorage) Store(id int, content io.Reader) (storage.StoreInfo, error
 		Size: size,
 	}, nil
 }
+
+func (s *DiskStorage) Read(id int) (io.Reader, error) {
+	sid := fmt.Sprintf("%d", id)
+	p := path.Join(s.DataPath, sid)
+
+	return os.Open(p)
+}
