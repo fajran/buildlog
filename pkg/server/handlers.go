@@ -17,6 +17,12 @@ type Build struct {
 }
 
 type Log struct {
+	Id      int    `json:"id"`
+	BuildId int    `json:"buildId"`
+	Type    string `json:"type"`
+}
+
+type LogMetadata struct {
 	Id      int `json:"id"`
 	BuildId int `json:"buildId"`
 
@@ -115,7 +121,9 @@ func (s *Server) handlePostLog(w http.ResponseWriter, r *http.Request) {
 	}
 
 	l := Log{
-		Id: lid,
+		Id:      lid,
+		BuildId: build.Id,
+		Type:    t,
 	}
 
 	err = json.NewEncoder(w).Encode(l)
@@ -158,7 +166,7 @@ func (s *Server) handleGetLogMetadata(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonData := Log{
+	jsonData := LogMetadata{
 		Id:                   data.Id,
 		BuildId:              data.Build.Id,
 		Type:                 data.Type,
