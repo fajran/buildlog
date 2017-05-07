@@ -28,8 +28,7 @@ type Log struct {
 	ContentType          string
 	ContentTypeParameter string
 
-	ContentId string
-	Size      int64
+	Size int64
 
 	Build *Build
 }
@@ -101,12 +100,12 @@ func (b *Build) Log(logType, contentType string, content io.Reader) (int, error)
 		return 0, err
 	}
 
-	info, err := b.buildlog.storage.Store(id, content)
+	size, err := b.buildlog.storage.Store(id, content)
 	if err != nil {
 		return id, err
 	}
 
-	_, err = b.buildlog.db.Exec(`UPDATE logs SET identifier=$1, size=$2 WHERE id=$3`, info.Id, info.Size, id)
+	_, err = b.buildlog.db.Exec(`UPDATE logs SET size=$1 WHERE id=$2`, size, id)
 	if err != nil {
 		return id, err
 	}
@@ -116,7 +115,7 @@ func (b *Build) Log(logType, contentType string, content io.Reader) (int, error)
 
 func (b *Build) GetLog(id int) (*Log, error) {
 	rows, err := b.buildlog.db.Query(
-		`SELECT id, type, content_type, content_type_parameter, identifier, size FROM logs
+		`SELECT id, type, content_type, content_type_parameter, size FROM logs
 		 WHERE build_id=$1 AND id=$2`,
 		b.Id, id)
 	if err != nil {
@@ -129,9 +128,7 @@ func (b *Build) GetLog(id int) (*Log, error) {
 		data := Log{
 			Build: b,
 		}
-		err = rows.Scan(
-			&data.Id, &data.Type, &data.ContentType, &data.ContentTypeParameter,
-			&data.ContentId, &data.Size)
+		err = rows.Scan(&data.Id, &data.Type, &data.ContentType, &data.ContentTypeParameter, &data.Size)
 		if err != nil {
 			return nil, err
 		}

@@ -46,23 +46,20 @@ func (s *DiskStorage) Info() storage.Info {
 	}
 }
 
-func (s *DiskStorage) Store(id int, content io.Reader) (storage.StoreInfo, error) {
+func (s *DiskStorage) Store(id int, content io.Reader) (int64, error) {
 	sid := fmt.Sprintf("%d", id)
 	p := path.Join(s.DataPath, sid)
 	f, err := os.Create(p)
 	if err != nil {
-		return storage.StoreInfo{}, err
+		return 0, err
 	}
 
 	size, err := io.Copy(f, content)
 	if err != nil {
-		return storage.StoreInfo{}, err
+		return 0, err
 	}
 
-	return storage.StoreInfo{
-		Id:   sid,
-		Size: size,
-	}, nil
+	return size, nil
 }
 
 func (s *DiskStorage) Read(id int) (io.Reader, error) {
