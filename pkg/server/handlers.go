@@ -20,9 +20,10 @@ type Log struct {
 	Id      int `json:"id"`
 	BuildId int `json:"buildId"`
 
-	Type        string `json:"type"`
-	ContentType string `json:"contentType"`
-	Size        int64  `json:"size"`
+	Type                 string `json:"type"`
+	ContentType          string `json:"contentType"`
+	ContentTypeParameter string `json:"contentTypeParameter"`
+	Size                 int64  `json:"size"`
 }
 
 func (s *Server) handleNewBuild(w http.ResponseWriter, r *http.Request) {
@@ -158,11 +159,12 @@ func (s *Server) handleGetLogMetadata(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonData := Log{
-		Id:          data.Id,
-		BuildId:     data.Build.Id,
-		Type:        data.Type,
-		ContentType: data.ContentType,
-		Size:        data.Size,
+		Id:                   data.Id,
+		BuildId:              data.Build.Id,
+		Type:                 data.Type,
+		ContentType:          data.ContentType,
+		ContentTypeParameter: data.ContentTypeParameter,
+		Size:                 data.Size,
 	}
 	err = json.NewEncoder(w).Encode(jsonData)
 	if err != nil {
