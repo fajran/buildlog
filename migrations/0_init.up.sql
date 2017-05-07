@@ -13,9 +13,11 @@ CREATE TABLE logs (
 	build_id INT NOT NULL,
 	created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
-	type VARCHAR(50),
-	content_type VARCHAR(100),
-	content_type_parameter VARCHAR(200),
+	type VARCHAR(50) NOT NULL,
+
+	content_type VARCHAR(100) NOT NULL,
+	content_type_parameter VARCHAR(200) NOT NULL,
+
 	size BIGINT
 );
 
