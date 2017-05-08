@@ -11,15 +11,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type NewBuild struct {
+	Id int `json:"id"`
+}
+
 type Build struct {
 	Id  int    `json:"id"`
 	Key string `json:"key"`
 }
 
-type Log struct {
-	Id      int    `json:"id"`
-	BuildId int    `json:"buildId"`
-	Type    string `json:"type"`
+type NewLog struct {
+	Id int `json:"id"`
 }
 
 type LogMetadata struct {
@@ -46,9 +48,8 @@ func (s *Server) handleNewBuild(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b := Build{
-		Id:  id,
-		Key: key,
+	b := NewBuild{
+		Id: id,
 	}
 	err = json.NewEncoder(w).Encode(b)
 	if err != nil {
@@ -120,10 +121,8 @@ func (s *Server) handlePostLog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	l := Log{
-		Id:      lid,
-		BuildId: build.Id,
-		Type:    t,
+	l := NewLog{
+		Id: lid,
 	}
 
 	err = json.NewEncoder(w).Encode(l)
