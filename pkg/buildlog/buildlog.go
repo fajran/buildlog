@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"io"
 	"strings"
+	"time"
 
 	logstorage "github.com/fajran/buildlog/pkg/storage"
 )
@@ -14,16 +15,17 @@ type BuildLog struct {
 }
 
 type Build struct {
-	Id  int
-	Key string
+	Id      int
+	Key     string
+	Created time.Time
 
 	buildlog *BuildLog
 }
 
 type Log struct {
-	Id int
-
-	Type string
+	Id      int
+	Type    string
+	Created time.Time
 
 	ContentType          string
 	ContentTypeParameter string
@@ -51,7 +53,7 @@ func (bl *BuildLog) Create(key string) (int, error) {
 }
 
 func (bl *BuildLog) Get(id int) (*Build, error) {
-	rows, err := bl.db.Query(`SELECT id, key FROM builds WHERE id=$1`, id)
+	rows, err := bl.db.Query(`SELECT id, key, created FROM builds WHERE id=$1`, id)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +64,7 @@ func (bl *BuildLog) Get(id int) (*Build, error) {
 		build := Build{
 			buildlog: bl,
 		}
-		err = rows.Scan(&build.Id, &build.Key)
+		err = rows.Scan(&build.Id, &build.Key, &build.Created)
 		if err != nil {
 			return nil, err
 		}
@@ -115,7 +117,7 @@ func (b *Build) Log(logType, contentType string, content io.Reader) (int, error)
 
 func (b *Build) GetLog(id int) (*Log, error) {
 	rows, err := b.buildlog.db.Query(
-		`SELECT id, type, content_type, content_type_parameter, size FROM logs
+		`SELECT id, type, created, content_type, content_type_parameter, size FROM logs
 		 WHERE build_id=$1 AND id=$2`,
 		b.Id, id)
 	if err != nil {
@@ -128,7 +130,7 @@ func (b *Build) GetLog(id int) (*Log, error) {
 		data := Log{
 			Build: b,
 		}
-		err = rows.Scan(&data.Id, &data.Type, &data.ContentType, &data.ContentTypeParameter, &data.Size)
+		err = rows.Scan(&data.Id, &data.Type, &data.Created, &data.ContentType, &data.ContentTypeParameter, &data.Size)
 		if err != nil {
 			return nil, err
 		}

@@ -18,6 +18,8 @@ type NewBuild struct {
 type Build struct {
 	Id  int    `json:"id"`
 	Key string `json:"key"`
+
+	Created iso8601 `json:"created"`
 }
 
 type NewLog struct {
@@ -25,8 +27,9 @@ type NewLog struct {
 }
 
 type LogMetadata struct {
-	Id      int `json:"id"`
-	BuildId int `json:"buildId"`
+	Id      int     `json:"id"`
+	BuildId int     `json:"buildId"`
+	Created iso8601 `json:"created"`
 
 	Type                 string `json:"type"`
 	ContentType          string `json:"contentType"`
@@ -77,8 +80,9 @@ func (s *Server) handleGetBuild(w http.ResponseWriter, r *http.Request) {
 	}
 
 	b := Build{
-		Id:  build.Id,
-		Key: build.Key,
+		Id:      build.Id,
+		Key:     build.Key,
+		Created: iso8601(build.Created),
 	}
 
 	err = json.NewEncoder(w).Encode(b)
@@ -168,6 +172,7 @@ func (s *Server) handleGetLogMetadata(w http.ResponseWriter, r *http.Request) {
 	jsonData := LogMetadata{
 		Id:                   data.Id,
 		BuildId:              data.Build.Id,
+		Created:              iso8601(data.Created),
 		Type:                 data.Type,
 		ContentType:          data.ContentType,
 		ContentTypeParameter: data.ContentTypeParameter,
